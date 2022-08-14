@@ -113,13 +113,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             del_mods(MOD_MASK_CTRL);
             register_code(KC_UP);
             set_mods(mod_state);
+            return false;
         } else {
             unregister_code(KC_UP);
+            return false;
         }
-      } else {
-        return true;
       }
-      return false;
+      return true;
     //CTRL + J is left
     case KC_J:
       if (mod_state & MOD_MASK_CTRL){
@@ -127,13 +127,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             del_mods(MOD_MASK_CTRL);
             register_code(KC_LEFT);
             set_mods(mod_state);
+            return false;
         } else {
             unregister_code(KC_LEFT);
+            return false;
         }
-      } else {
-        return true;
       }
-      return false;
+      return true;
     //CTRL + K is down
     case KC_K:
       if (mod_state & MOD_MASK_CTRL){
@@ -141,13 +141,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             del_mods(MOD_MASK_CTRL);
             register_code(KC_DOWN);
             set_mods(mod_state);
+            return false;
         } else {
             unregister_code(KC_DOWN);
+            return false;
         }
-      } else {
-        return true;
       }
-      return false;
+      return true;
     //CTRL + L is right
     case KC_L:
       if (mod_state & MOD_MASK_CTRL){
@@ -155,17 +155,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             del_mods(MOD_MASK_CTRL);
             register_code(KC_RGHT);
             set_mods(mod_state);
+            return false;
         } else {
             unregister_code(KC_RGHT);
+            return false;
         }
-      } else {
-        return true;
       }
-      return false;
-    default:
       return true;
     }
-
     return true;
 };
 
