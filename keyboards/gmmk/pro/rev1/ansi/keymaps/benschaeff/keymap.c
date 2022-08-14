@@ -20,9 +20,9 @@ enum userspace_layers {
 };
 
 //custom keycodes
-#define MODS_LALT_MASK (MOD_BIT(KC_LALT)) // Make ALT layer for encoder use
-#define MODS_LCTRL_MASK (MOD_BIT(KC_LCTL)) // Make CTRL layer for encoder use
-#define MODS_LSFT_MASK (MOD_BIT(KC_LSFT)) // Make LSHIFT layer for encoder use
+#define MOD_MASK_LALT (MOD_BIT(KC_LALT)) // Make ALT layer for encoder use
+#define MOD_MASK_LCTRL (MOD_BIT(KC_LCTL)) // Make CTRL layer for encoder use
+#define MOD_MASK_LSFT (MOD_BIT(KC_LSFT)) // Make LSHIFT layer for encoder use
 #define SWAP_L SGUI(KC_LEFT) // Swap application to left display
 #define SWAP_R SGUI(KC_RGHT) // Swap application to right display
 #define MINI LGUI(KC_DOWN) // Shrink window
@@ -108,15 +108,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
     //CTRL + I is up
     case KC_I:
-      if (mod_state & (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL))){
+      if (mod_state & MOD_MASK_CTRL){
         if(record->event.pressed) {
-            del_mods(mod_state);
+            del_mods(MOD_MASK_CTRL);
             register_code(KC_UP);
             set_mods(mod_state);
         } else {
-            del_mods(mod_state);
             unregister_code(KC_UP);
-            set_mods(mod_state);
         }
       } else {
         return true;
@@ -124,15 +122,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
     //CTRL + J is left
     case KC_J:
-      if (mod_state & (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL))){
+      if (mod_state & MOD_MASK_CTRL){
         if(record->event.pressed) {
-            del_mods(mod_state);
+            del_mods(MOD_MASK_CTRL);
             register_code(KC_LEFT);
             set_mods(mod_state);
         } else {
-            del_mods(mod_state);
             unregister_code(KC_LEFT);
-            set_mods(mod_state);
         }
       } else {
         return true;
@@ -140,15 +136,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
     //CTRL + K is down
     case KC_K:
-      if (mod_state & (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL))){
+      if (mod_state & MOD_MASK_CTRL){
         if(record->event.pressed) {
-            del_mods(mod_state);
+            del_mods(MOD_MASK_CTRL);
             register_code(KC_DOWN);
             set_mods(mod_state);
         } else {
-            del_mods(mod_state);
             unregister_code(KC_DOWN);
-            set_mods(mod_state);
         }
       } else {
         return true;
@@ -156,15 +150,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
     //CTRL + L is right
     case KC_L:
-      if (mod_state & (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL))){
+      if (mod_state & MOD_MASK_CTRL){
         if(record->event.pressed) {
-            del_mods(mod_state);
+            del_mods(MOD_MASK_CTRL);
             register_code(KC_RGHT);
             set_mods(mod_state);
         } else {
-            del_mods(mod_state);
             unregister_code(KC_RGHT);
-            set_mods(mod_state);
         }
       } else {
         return true;
@@ -180,7 +172,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 bool encoder_update_user(uint8_t index, bool clockwise)
 {
     //ctrl
-    if (get_mods() & MODS_LALT_MASK) {
+    if (get_mods() & MOD_MASK_LALT) {
         if (clockwise) {
             tap_code(KC_TAB);
         }
@@ -189,7 +181,7 @@ bool encoder_update_user(uint8_t index, bool clockwise)
         }
 	}
     //alt
-    else if (get_mods() & MODS_LCTRL_MASK) {
+    else if (get_mods() & MOD_MASK_LCTRL) {
         if (clockwise) {
             tap_code(KC_TAB);
         }
@@ -197,18 +189,18 @@ bool encoder_update_user(uint8_t index, bool clockwise)
             tap_code16(S(KC_TAB));
         }
     }
-    //shfit
-    else if (get_mods() & MODS_LSFT_MASK) {
+    //shift
+    else if (get_mods() & MOD_MASK_LSFT){
         //we do this a weird way because we don't want shift to acutally be held when using rotary encoder
         if (clockwise) {
-            del_mods(MODS_LSFT_MASK);
+            del_mods(MOD_MASK_LSFT);
             tap_code(KC_RGHT);
-            set_mods(MODS_LSFT_MASK);
+            set_mods(MOD_MASK_LSFT);
         }
         else {
-            del_mods(MODS_LSFT_MASK);
+            del_mods(MOD_MASK_LSFT);
             tap_code(KC_LEFT);
-            set_mods(MODS_LSFT_MASK);
+            set_mods(MOD_MASK_LSFT);
         }
     }
     //on function layer
