@@ -14,7 +14,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 
 enum userspace_layers {
-  QWERTY,
+    QWERTY,
 	FNLAYER,
 	POPTAB,
 };
@@ -58,7 +58,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_LSFT,          KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,          KC_RSFT, KC_UP,   KC_PGDN,
         KC_LCTL, KC_LGUI, KC_LALT,                            KC_SPC,                             KC_RALT, MO(FNLAYER),   KC_RCTL, KC_LEFT, KC_DOWN, KC_RGHT
     ),
-
     [FNLAYER] = LAYOUT(
         CLOSEAPPLICATION, CLOSETAB,_______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, KC_MEDIA_PLAY_PAUSE,
         _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
@@ -67,7 +66,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,          _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______, _______, _______,
         _______, _______, _______,                            _______,                            RGB_TOG, KC_TRNS, _______, _______, _______, _______
     ),
-
 
 };
 
@@ -108,10 +106,77 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         // Let QMK process the KC_BSPC keycode as usual outside of shift
         return true;
     }
-
+    //CTRL + I is up
+    case KC_I:
+      if (mod_state & (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL))){
+        if(record->event.pressed) {
+            del_mods(mod_state);
+            register_code(KC_UP);
+            set_mods(mod_state);
+        } else {
+            del_mods(mod_state);
+            unregister_code(KC_UP);
+            set_mods(mod_state);
+        }
+      } else {
+        return true;
+      }
+      return false;
+    //CTRL + J is left
+    case KC_J:
+      if (mod_state & (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL))){
+        if(record->event.pressed) {
+            del_mods(mod_state);
+            register_code(KC_LEFT);
+            set_mods(mod_state);
+        } else {
+            del_mods(mod_state);
+            unregister_code(KC_LEFT);
+            set_mods(mod_state);
+        }
+      } else {
+        return true;
+      }
+      return false;
+    //CTRL + K is down
+    case KC_K:
+      if (mod_state & (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL))){
+        if(record->event.pressed) {
+            del_mods(mod_state);
+            register_code(KC_DOWN);
+            set_mods(mod_state);
+        } else {
+            del_mods(mod_state);
+            unregister_code(KC_DOWN);
+            set_mods(mod_state);
+        }
+      } else {
+        return true;
+      }
+      return false;
+    //CTRL + L is right
+    case KC_L:
+      if (mod_state & (MOD_BIT(KC_LCTL) | MOD_BIT(KC_RCTL))){
+        if(record->event.pressed) {
+            del_mods(mod_state);
+            register_code(KC_RGHT);
+            set_mods(mod_state);
+        } else {
+            del_mods(mod_state);
+            unregister_code(KC_RGHT);
+            set_mods(mod_state);
+        }
+      } else {
+        return true;
+      }
+      return false;
+    default:
+      return true;
     }
+
     return true;
 };
+
 bool encoder_update_user(uint8_t index, bool clockwise)
 {
     //ctrl
