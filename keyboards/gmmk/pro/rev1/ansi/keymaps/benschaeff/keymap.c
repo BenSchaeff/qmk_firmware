@@ -20,8 +20,9 @@ enum userspace_layers {
 };
 
 //custom keycodes
-#define MODS_ALT_MASK (MOD_BIT(KC_LALT)) // Make ALT layer for encoder use
-#define MODS_CTRL_MASK (MOD_BIT(KC_LCTL)) // Make CTRL layer for encoder use
+#define MODS_LALT_MASK (MOD_BIT(KC_LALT)) // Make ALT layer for encoder use
+#define MODS_LCTRL_MASK (MOD_BIT(KC_LCTL)) // Make CTRL layer for encoder use
+#define MODS_LSFT_MASK (MOD_BIT(KC_LSFT)) // Make LSHIFT layer for encoder use
 #define SWAP_L SGUI(KC_LEFT) // Swap application to left display
 #define SWAP_R SGUI(KC_RGHT) // Swap application to right display
 #define MINI LGUI(KC_DOWN) // Shrink window
@@ -70,58 +71,102 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 };
 
+//this makes shift+backspace do delete
+uint8_t mod_state;
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    // Store the current modifier state in the variable for later reference
+    mod_state = get_mods();
+    switch (keycode) {
 
-bool encoder_update_user(uint8_t index, bool clockwise)
-{
-  if (get_mods() & MODS_ALT_MASK)
-	{
-			if (clockwise)
-			{
-				tap_code(KC_TAB);
-			}
-			else
-			{
-				tap_code(S(KC_TAB));
-			}
-	}
-	else if (get_mods() & MODS_CTRL_MASK)
-  {
-    if (clockwise)
-    {
-      tap_code(KC_TAB);
+    case KC_BSPC:
+        {
+        // Initialize a boolean variable that keeps track
+        // of the delete key status: registered or not?
+        static bool delkey_registered;
+        if (record->event.pressed) {
+            // Detect the activation of either shift keys
+            if (mod_state & MOD_MASK_SHIFT) {
+                // First temporarily canceling both shifts so that
+                // shift isn't applied to the KC_DEL keycode
+                del_mods(MOD_MASK_SHIFT);
+                register_code(KC_DEL);
+                // Update the boolean variable to reflect the status of KC_DEL
+                delkey_registered = true;
+                // Reapplying modifier state so that the held shift key(s)
+                // still work even after having tapped the Backspace/Delete key.
+                set_mods(mod_state);
+                return false;
+            }
+        } else { // on release of KC_BSPC
+            // In case KC_DEL is still being sent even after the release of KC_BSPC
+            if (delkey_registered) {
+                unregister_code(KC_DEL);
+                delkey_registered = false;
+                return false;
+            }
+        }
+        // Let QMK process the KC_BSPC keycode as usual outside of shift
+        return true;
     }
-    else
-    {
-      tap_code(S(KC_TAB));
-
-    }
-  }
-  else if(IS_LAYER_ON(FNLAYER))
-    {
-      if(clockwise)
-      {
-        tap_code(KC_MEDIA_NEXT_TRACK);
-      }
-      else
-      {
-        tap_code(KC_MEDIA_PREV_TRACK);
-      }
-    }
-    else
-    {
-      if (clockwise)
-      {
-        tap_code(KC_VOLU);
-      }
-      else
-      {
-        tap_code(KC_VOLD);
-      }
 
     }
     return true;
-
+};
+bool encoder_update_user(uint8_t index, bool clockwise)
+{
+    //ctrl
+    if (get_mods() & MODS_LALT_MASK) {
+        if (clockwise) {
+            tap_code(KC_TAB);
+        }
+        else {
+            tap_code16(S(KC_TAB));
+        }
+	}
+    //alt
+    else if (get_mods() & MODS_LCTRL_MASK) {
+        if (clockwise) {
+            tap_code(KC_TAB);
+        }
+        else {
+            tap_code16(S(KC_TAB));
+        }
+    }
+    //shfit
+    else if (get_mods() & MODS_LSFT_MASK) {
+        //we do this a weird way because we don't want shift to acutally be held when using rotary encoder
+        if (clockwise) {
+            del_mods(MODS_LSFT_MASK);
+            tap_code(KC_RGHT);
+            set_mods(MODS_LSFT_MASK);
+        }
+        else {
+            del_mods(MODS_LSFT_MASK);
+            tap_code(KC_LEFT);
+            set_mods(MODS_LSFT_MASK);
+        }
+    }
+    //on function layer
+    else if(IS_LAYER_ON(FNLAYER)) {
+        if(clockwise){
+            tap_code(KC_MEDIA_NEXT_TRACK);
+        }
+        else {
+            tap_code(KC_MEDIA_PREV_TRACK);
+        }
+    }
+    //nothing pressed
+    else {
+        if (clockwise){
+        tap_code(KC_VOLU);
+        }
+        else{
+        tap_code(KC_VOLD);
+        }
+    }
+    return false;
 }
+
   void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     switch(get_highest_layer(layer_state))
     {  // special handling per layer
@@ -135,7 +180,7 @@ bool encoder_update_user(uint8_t index, bool clockwise)
                         RGB_MATRIX_INDICATOR_SET_COLOR(i,32,32,32);
                     }
                     //light orange keys
-                    /*
+
                     RGB_MATRIX_INDICATOR_SET_COLOR(0, 255, 153, 51) //esc
                     RGB_MATRIX_INDICATOR_SET_COLOR(1, 255, 153, 51) //`
                     RGB_MATRIX_INDICATOR_SET_COLOR(7, 255, 153, 51)//1
@@ -181,7 +226,7 @@ bool encoder_update_user(uint8_t index, bool clockwise)
                     RGB_MATRIX_INDICATOR_SET_COLOR(31, 76, 0, 153)//g
                     RGB_MATRIX_INDICATOR_SET_COLOR(36, 76, 0, 153)//y
                     RGB_MATRIX_INDICATOR_SET_COLOR(40, 76, 0, 153)//7
-                    */
+
 
 
 
@@ -189,10 +234,10 @@ bool encoder_update_user(uint8_t index, bool clockwise)
 
             case 1:
 
-                 for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++)
-                    {
-                        RGB_MATRIX_INDICATOR_SET_COLOR(i,0,0,0);
-                    }
+                for (uint8_t i = 0; i < DRIVER_LED_TOTAL; i++)
+                {
+                    RGB_MATRIX_INDICATOR_SET_COLOR(i,0,0,0);
+                }
                 RGB_MATRIX_INDICATOR_SET_COLOR(0, 255, 153, 51) //esc
                 RGB_MATRIX_INDICATOR_SET_COLOR(6, 64, 64, 64) //f1
                 RGB_MATRIX_INDICATOR_SET_COLOR(8, 255, 128, 0)//q //q
